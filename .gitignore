@@ -12,6 +12,19 @@ src_managed/
 project/boot/
 project/plugins/project/
 
+# Eclipse specific
+.project
+.classpath
+.settings
+.metadata
+
+# IntelliJ IDEA specific
+*.iml
+*.ipr
+*.iws
+.idea
+
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+
