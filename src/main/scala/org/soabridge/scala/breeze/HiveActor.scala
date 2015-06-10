@@ -16,19 +16,32 @@ private[breeze] class HiveActor extends Actor {
   import HiveActor.Messages._
 
   /** Supervising actor for all resources in the hive */
-  val resActor = context.watch(context.actorOf(ResourceActor.props, "resources"))
+  private var resActor: ActorRef = _
   /** Supervising actor for all configured module instances */
-  val modActor = context.watch(context.actorOf(ModulesActor.props, "modules"))
+  private var modActor: ActorRef = _
 
-  /** */
+  /** Supervisor strategy for the subordinate actors. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     //TODO slk: implement supervisor strategy
     case Exception => Resume
   }
 
   /** Message processing */
-  def receive: Receive = {
+  def receive: Receive = initialize
+
+  val initialize: Receive = {
+    case Start =>
+      // Initializing the subordinate actors
+      resActor = context.watch(context.actorOf(ResourceActor.props, "resources"))
+      modActor = context.watch(context.actorOf(ModulesActor.props, "modules"))
+      // Switching context to 'processing'
+      context become processing
     case Status =>
+  }
+
+  val processing: Receive = {
+    case Status =>
+    case Stop =>
     case Terminated =>
   }
 }
