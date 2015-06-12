@@ -1,6 +1,7 @@
 package org.soabridge.scala.breeze.resources
 
-import akka.actor.{Props, Actor}
+import akka.actor.SupervisorStrategy.Resume
+import akka.actor._
 
 /**
  * Missing documentation. 
@@ -12,9 +13,30 @@ private[breeze] class ResourceActor extends Actor {
   /* Importing all messages declared in companion object for processing */
   import ResourceActor.Messages._
 
+  /** Supervisor strategy for the subordinate module handlers. */
+  override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
+    //TODO slk: implement supervisor strategy
+    case Exception => Resume
+  }
+
   /** Message processing */
-  def receive: Receive = {
+  def receive: Receive = initialize
+
+  val initialize: Receive = {
+    case Start =>
+      //TODO slk: implement module initialization
+      context become processing
     case Status =>
+      //TODO slk: implement Status behavior
+  }
+
+  val processing: Receive = {
+    case Status =>
+      //TODO slk: implement Status behavior
+    case Stop =>
+      //TODO slk: implement Stop behavior
+    case Terminated =>
+      //TODO slk: implement watchdog behavior
   }
 }
 
@@ -30,6 +52,8 @@ private[breeze] object ResourceActor {
 
   /** Accepted messages for ResourceActor */
   object Messages {
-    case class Status
+    case object Start
+    case object Status
+    case object Stop
   }
 }
