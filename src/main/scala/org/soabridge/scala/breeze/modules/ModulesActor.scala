@@ -27,12 +27,16 @@ private[breeze] class ModulesActor extends Actor {
       //TODO slk: implement module initialization
       context become processing
     case Status =>
+      //TODO slk: implement Status behavior
   }
 
   val processing: Receive = {
     case Status =>
+      //TODO slk: implement Status behavior
     case Stop =>
+      //TODO slk: implement Stop behavior
     case Terminated =>
+      //TODO slk: implement watchdog behavior
   }
 }
 

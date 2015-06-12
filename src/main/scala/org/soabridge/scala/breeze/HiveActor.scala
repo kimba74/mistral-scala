@@ -37,12 +37,16 @@ private[breeze] class HiveActor extends Actor {
       // Switching context to 'processing'
       context become processing
     case Status =>
+      //TODO slk: implement Status behavior
   }
 
   val processing: Receive = {
     case Status =>
+      //TODO slk: implement Status behavior
     case Stop =>
+      //TODO slk: implement Stop behavior
     case Terminated =>
+      //TODO slk: implement watchdog behavior
   }
 }
 
