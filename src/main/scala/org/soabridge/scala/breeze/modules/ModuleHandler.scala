@@ -2,6 +2,7 @@ package org.soabridge.scala.breeze.modules
 
 import akka.actor.SupervisorStrategy.Resume
 import akka.actor.{Actor, OneForOneStrategy, Props, SupervisorStrategy}
+import com.typesafe.config.Config
 
 /**
  * Missing documentation. 
@@ -9,7 +10,7 @@ import akka.actor.{Actor, OneForOneStrategy, Props, SupervisorStrategy}
  * @author <a href="steffen.krause@soabridge.com">Steffen Krause</a>
  * @since 1.0
  */
-class ModuleHandler extends Actor {
+class ModuleHandler(config: Config) extends Actor {
 
   import ModuleHandler.Messages._
   // TODO slk: implement Worker Pool
