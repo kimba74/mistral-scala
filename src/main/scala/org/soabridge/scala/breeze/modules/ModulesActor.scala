@@ -16,7 +16,7 @@ private[breeze] class ModulesActor extends Actor {
   /** Supervisor strategy for the subordinate module handlers. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     //TODO slk: implement supervisor strategy
-    case Exception => Resume
+    case _ => Resume
   }
 
   /** Message processing */

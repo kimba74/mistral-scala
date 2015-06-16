@@ -23,7 +23,7 @@ private[breeze] class HiveActor extends Actor {
   /** Supervisor strategy for the subordinate actors. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     //TODO slk: implement supervisor strategy
-    case Exception => Resume
+    case _ => Resume
   }
 
   /** Message processing */

@@ -15,10 +15,12 @@ class ModuleHandler(config: Config) extends Actor {
   import ModuleHandler.Messages._
   // TODO slk: implement Worker Pool
 
+  val settings = new ModuleSettings(config, self.path.name)
+
   /** */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     // TODO slk: implement supervision strategy for Worker Pool
-    case Exception => Resume
+    case _ => Resume
   }
 
   /** */
