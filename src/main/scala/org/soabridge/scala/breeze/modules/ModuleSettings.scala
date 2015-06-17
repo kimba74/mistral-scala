@@ -10,8 +10,9 @@ import com.typesafe.config.Config
  */
 class ModuleSettings(conf: Config, final val name: String) {
 
-  private def prop(pn: String) = name + "." + pn
+  final val mailboxType = conf.getString("mailbox.type")
 
-  final val workerType = conf.getString(prop("worker.type"))
-  final val mailboxType = conf.getString(prop("mailbox.type"))
+  final val raw = conf
+
+  final val workerType = conf.getString("worker.type")
 }

@@ -2,6 +2,7 @@ package org.soabridge.scala.breeze.modules
 
 import akka.actor.SupervisorStrategy.Resume
 import akka.actor.{Actor, OneForOneStrategy, Props, SupervisorStrategy}
+import akka.routing.RoundRobinPool
 import com.typesafe.config.Config
 
 /**
@@ -10,12 +11,13 @@ import com.typesafe.config.Config
  * @author <a href="steffen.krause@soabridge.com">Steffen Krause</a>
  * @since 1.0
  */
-class ModuleHandler(config: Config) extends Actor {
+class ModuleHandler(val settings: ModuleSettings) extends Actor {
 
   import ModuleHandler.Messages._
-  // TODO slk: implement Worker Pool
 
-  val settings = new ModuleSettings(config, self.path.name)
+  // Creating 10 workers of configured type
+  // TODO slk: turn configured worker into object for Props
+  // private val workers = context.actorOf(RoundRobinPool(10).props(<actor_here>), settings.name)
 
   /** */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
