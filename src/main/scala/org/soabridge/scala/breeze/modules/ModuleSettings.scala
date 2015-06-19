@@ -14,5 +14,7 @@ class ModuleSettings(val conf: Config, final val name: String) {
 
   final val mailboxType = conf.getString("mailbox.type")
 
+  final val workerParams = conf.getString("worker.params")
+
   final val workerType = conf.getString("worker.type")
 }
