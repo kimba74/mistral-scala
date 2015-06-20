@@ -3,7 +3,6 @@ package org.soabridge.scala.breeze.modules
 import akka.actor.SupervisorStrategy.Resume
 import akka.actor.{Actor, OneForOneStrategy, Props, SupervisorStrategy}
 import akka.routing.RoundRobinPool
-import com.typesafe.config.Config
 
 /**
  * Missing documentation. 
