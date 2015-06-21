@@ -5,7 +5,8 @@ lazy val scalaSandbox = (project in file (".")).
     sbtVersion := "0.13.8",
     scalaVersion := "2.11.6",
     libraryDependencies ++= Seq(
-      "com.typesafe" % "config" % "1.2.1",
-      "com.typesafe.akka" %% "akka-actor" % "2.3.11"
+      "com.typesafe"      %  "config"        % "1.2.1",
+      "com.typesafe.akka" %% "akka-actor"    % "2.3.11",
+      "org.scala-lang"    %  "scala-reflect" % "2.11.6"
     )
   )
