@@ -12,6 +12,8 @@ import scala.reflect.runtime.{universe => ru}
  */
 class ModuleSettings(val conf: Config, final val name: String) {
 
+  private def validate(config: Config):Boolean = true // TODO slk: implement validation logic
+
   final val mailboxParams = conf.getConfig("mailbox.params")
 
   final val mailboxType = Class.forName(conf.getString("mailbox.type")) // TODO slk: figure out reflection in Scala
