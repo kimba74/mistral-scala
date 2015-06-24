@@ -16,6 +16,7 @@ class ModuleSettings(val conf: Config, final val name: String) {
 
   final val mailboxParams = conf.getConfig("mailbox.params")
 
+  // TODO slk: look into Scala reflection Mirrors
   final val mailboxType = Class.forName(conf.getString("mailbox.type")) // TODO slk: figure out reflection in Scala
 
   final val workerParams = conf.getString("worker.params")
