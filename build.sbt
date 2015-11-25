@@ -7,6 +7,6 @@ lazy val scalaMistral = (project in file (".")).
     libraryDependencies ++= Seq(
       "com.typesafe"      %  "config"        % "1.3.0",
       "com.typesafe.akka" %% "akka-actor"    % "2.3.12",
-      "org.scala-lang"    %  "scala-reflect" % "2.11.6"
+      "org.scala-lang"    %  "scala-reflect" % "2.11.7"
     )
   )
