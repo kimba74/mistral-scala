@@ -18,9 +18,16 @@ class ModuleSettings(val conf: Config, final val name: String) {
   // TODO slk: look into Scala reflection Mirrors
   final val mailboxType = Class.forName(conf.getString("mailbox.type")) // TODO slk: figure out reflection in Scala
 
-  final val workerParams: String = conf.getString("worker.params")
+  final val workerParams: Seq[Any] = {
+    //conf.getString("worker.params")
+    Array("Test")
+  }
 
   final val workerPoolSize: Int = conf.getInt("worker.pool-size")
+
+  final val workerClass: Class[_] = {
+    Class.forName(conf.getString("worker.class"))
+  }
 
   final val workerType: Option[Props] = {
     val actor = Class.forName(conf.getString("worker.type"))
