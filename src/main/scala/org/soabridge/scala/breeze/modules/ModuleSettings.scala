@@ -13,10 +13,10 @@ class ModuleSettings(val conf: Config, final val name: String) {
 
   private def validate(config: Config):Boolean = true // TODO slk: implement validation logic
 
-  final val mailboxParams: Config = conf.getConfig("mailbox.params")
-
-  // TODO slk: look into Scala reflection Mirrors
-  final val mailboxType = Class.forName(conf.getString("mailbox.type")) // TODO slk: figure out reflection in Scala
+  final val workerEvents: Seq[Class[_]] = {
+    //conf.get...
+    Array(classOf[String])
+  }
 
   final val workerParams: Seq[Any] = {
     //conf.getString("worker.params")

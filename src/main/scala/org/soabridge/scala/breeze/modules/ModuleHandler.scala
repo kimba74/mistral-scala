@@ -19,10 +19,11 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
 
   /* NOTE!!
    * The ModuleSettings should include the following parameters
-   *   - The unique module name        (String)
-   *   - Pool size                     (Integer)
-   *   - The worker actor class        (Class[_] or Class[_ <: Actor])
-   *   - The worker actor's parameters (Seq[Any])
+   *   - The unique module name            (String)
+   *   - The worker pool size              (Integer)
+   *   - The worker actor class            (Class[_] or Class[_ <: Actor])
+   *   - The worker actor's parameters     (Seq[Any])
+   *   - The event classes to subscribe to (Seq[Class[_]])
    */
   // The ModuleHandler's internal configuration object
   private var handlerSettings = settings
@@ -88,16 +89,18 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
   private def startupHandler(): Unit = {
     // 1.) create worker pool (assume RoundRobinPool for now; get size from ModuleSettings)
     //   1.1) Assume RoundRobinPool for now
-    //   1.2) Get pool size from ModuleSettings         (workerPoolSize: Int > 0)
+    //   1.2) Get pool size from ModuleSettings           (workerPoolSize: Int > 0)
     val pool  = RoundRobinPool(handlerSettings.workerPoolSize)
-    //   1.2) Get worker class from ModuleSettings      (workerClass: Class[_]  )
-    //   1.3) Get worker parameters from ModuleSettings (workerParams: Seq[Any] )
+    //   1.2) Get worker class from ModuleSettings        (workerClass: Class[_]  )
+    //   1.3) Get worker parameters from ModuleSettings   (workerParams: Seq[Any] )
     //   1.4) Set mailbox for pool (get default mailbox from master settings -> default to SelectiveMailbox)
     val props = Props(handlerSettings.workerClass, handlerSettings.workerParams).withMailbox("<<Mailbox String>>")
-    //   1.5) Get module name from ModuleSettings       (name: String           )
+    //   1.5) Get module name from ModuleSettings         (name: String           )
     workerPool = Some(context.actorOf(pool.props(props), handlerSettings.name))
-    // 2.) Subscribe worker pool to event bus        (assume default ActorSystem event bus for right now)
-    // TODO slk: subscribe Worker Pool to EventBus
+    // 2.) Subscribe worker pool to all configured events (assume default ActorSystem event bus for right now)
+    handlerSettings.workerEvents.foreach {event =>
+      context.system.eventStream.subscribe(workerPool.get, event)
+    }
   }
 
   private def stopHandler(): Unit = {
