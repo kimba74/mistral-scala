@@ -40,8 +40,10 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     case _ => Resume
   }
 
-  /** */
-  def receive: Receive = stateInitial
+  /**
+   * Sets the initial state of the actor after creation to state "Initialize".
+   */
+  def receive: Receive = stateInitialize
 
   /**
    * Initial state of the ModuleHandler when being created. In this state the
@@ -50,12 +52,11 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
    * Supported</i> response.
    * @return The Receive implementation for this state.
    */
-  def stateInitial: Receive = {
+  def stateInitialize: Receive = {
     case Configure(newSettings) =>
       handlerSettings = newSettings
     case Start =>
       startupHandler()
-      context become stateRunning
     case Status =>
       sender ! createStatusResponse()
     case unsupported =>
@@ -71,11 +72,12 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
    * @return The Receive implementation for this state.
    */
   def stateRunning: Receive = {
+    case Reinitialize =>
+      reinitHandler()
     case Status =>
       sender ! createStatusResponse()
     case Stop =>
       stopHandler()
-      context become stateInitial
     case unsupported =>
       sender ! MessageNotSupported(unsupported.toString, "Running")
   }
@@ -86,6 +88,12 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     StatusResponse
   }
 
+  private def reinitHandler(): Unit = {
+    // TODO slk: implement reinitialization procedure
+    // Go into state "Initial"
+    context become stateInitialize
+  }
+
   private def startupHandler(): Unit = {
     // 1.) create worker pool (assume RoundRobinPool for now; get size from ModuleSettings)
     //   1.1) Assume RoundRobinPool for now
@@ -94,13 +102,15 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     //   1.2) Get worker class from ModuleSettings        (workerClass: Class[_]  )
     //   1.3) Get worker parameters from ModuleSettings   (workerParams: Seq[Any] )
     //   1.4) Set mailbox for pool (get default mailbox from master settings -> default to SelectiveMailbox)
-    val props = Props(handlerSettings.workerClass, handlerSettings.workerParams).withMailbox("<<Mailbox String>>")
+    val worker = Props(handlerSettings.workerClass, handlerSettings.workerParams).withMailbox("<<Mailbox String>>")
     //   1.5) Get module name from ModuleSettings         (name: String           )
-    workerPool = Some(context.actorOf(pool.props(props), handlerSettings.name))
+    workerPool = Some(context.actorOf(pool.props(worker), handlerSettings.name))
     // 2.) Subscribe worker pool to all configured events (assume default ActorSystem event bus for right now)
-    handlerSettings.workerEvents.foreach {event =>
+    handlerSettings.workerEvents.foreach { event =>
       context.system.eventStream.subscribe(workerPool.get, event)
     }
+    // Go into state "Running"
+    context become stateRunning
   }
 
   private def stopHandler(): Unit = {
@@ -133,6 +143,7 @@ object ModuleHandler {
    */
   object Requests {
     case class Configure(settings: ModuleSettings)
+    case object Reinitialize
     case object Start
     case object Status
     case object Stop
