@@ -98,7 +98,7 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     // 1.) create worker pool (assume RoundRobinPool for now; get size from ModuleSettings)
     //   1.1) Assume RoundRobinPool for now
     //   1.2) Get pool size from ModuleSettings           (workerPoolSize: Int > 0)
-    val pool  = RoundRobinPool(handlerSettings.workerPoolSize)
+    val pool  = RoundRobinPool(handlerSettings.poolSize)
     //   1.2) Get worker class from ModuleSettings        (workerClass: Class[_]  )
     //   1.3) Get worker parameters from ModuleSettings   (workerParams: Seq[Any] )
     //   1.4) Set mailbox for pool (get default mailbox from master settings -> default to SelectiveMailbox)
@@ -106,10 +106,10 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     //   1.5) Get module name from ModuleSettings         (name: String           )
     workerPool = Some(context.actorOf(pool.props(worker), handlerSettings.name))
     // 2.) Subscribe worker pool to all configured events (assume default ActorSystem event bus for right now)
-    handlerSettings.workerEvents.foreach { event =>
+    handlerSettings.events.foreach { event =>
       context.system.eventStream.subscribe(workerPool.get, event)
     }
-    // Go into state "Running"
+    // Switch handler into state "Running"
     context become stateRunning
   }
 

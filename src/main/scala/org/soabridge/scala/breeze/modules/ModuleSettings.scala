@@ -13,29 +13,19 @@ class ModuleSettings(val conf: Config, final val name: String) {
 
   private def validate(config: Config):Boolean = true // TODO slk: implement validation logic
 
-  final val workerEvents: Seq[Class[_]] = {
+  final val events: Seq[Class[_]] = {
     //conf.get...
     Array(classOf[String])
   }
+
+  final val workerClass: Class[_] = Class.forName(conf.getString("worker.class"))
 
   final val workerParams: Seq[Any] = {
     //conf.getString("worker.params")
     Array("Test")
   }
 
-  final val workerPoolSize: Int = conf.getInt("worker.pool-size")
-
-  final val workerClass: Class[_] = {
-    Class.forName(conf.getString("worker.class"))
-  }
-
-  final val workerType: Option[Props] = {
-    val actor = Class.forName(conf.getString("worker.type"))
-    if (Actor.getClass.isAssignableFrom(actor))
-      Some(Props(actor))
-    else
-      None
-  }
+  final val poolSize: Int = conf.getInt("worker.pool-size")
 }
 
 /**
