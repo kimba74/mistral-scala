@@ -58,9 +58,9 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     case Start =>
       startupHandler()
     case Status =>
-      sender ! createStatusResponse()
+      handleStatusReq(sender)
     case unsupported =>
-      sender ! MessageNotSupported(unsupported.toString, "Initial")
+      handleUnsupported(sender, unsupported.toString, "Initial")
   }
 
   /**
@@ -75,17 +75,22 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     case Reinitialize =>
       reinitHandler()
     case Status =>
-      sender ! createStatusResponse()
+      handleStatusReq(sender)
     case Stop =>
       stopHandler()
     case unsupported =>
-      sender ! MessageNotSupported(unsupported.toString, "Running")
+      handleUnsupported(sender, unsupported, "Running")
   }
 
 
-  private def createStatusResponse(): StatusResponse = {
-    // TODO slk: figure out what is being returned as status request
-    StatusResponse
+  private def handleStatusReq(origin: ActorRef): Unit = {
+    // TODO slk: implement status request-response procedure
+    origin ! StatusResponse
+  }
+
+  private def handleUnsupported(origin: ActorRef, message: Any, state: String): Unit = {
+    // TODO slk: implement handling unsupported messages
+    origin ! MessageNotSupported(message.toString, state)
   }
 
   private def reinitHandler(): Unit = {
