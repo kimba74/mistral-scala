@@ -100,17 +100,22 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
   }
 
   private def startupHandler(): Unit = {
-    // 1.) create worker pool (assume RoundRobinPool for now; get size from ModuleSettings)
+    // 1.) Create pool
     //   1.1) Assume RoundRobinPool for now
     //   1.2) Get pool size from ModuleSettings           (workerPoolSize: Int > 0)
-    val pool  = RoundRobinPool(handlerSettings.poolSize)
-    //   1.2) Get worker class from ModuleSettings        (workerClass: Class[_]  )
-    //   1.3) Get worker parameters from ModuleSettings   (workerParams: Seq[Any] )
-    //   1.4) Set mailbox for pool (get default mailbox from master settings -> default to SelectiveMailbox)
+    //   1.3) Set a SupervisorStrategy for the workers
+    val poolSuper = OneForOneStrategy() { case _ => Resume }
+    val pool      = RoundRobinPool(handlerSettings.poolSize, supervisorStrategy = poolSuper)
+    // 2.) Create worker props
+    //   2.1) Get worker class from ModuleSettings        (workerClass: Class[_]  )
+    //   2.2) Get worker parameters from ModuleSettings   (workerParams: Seq[Any] )
+    //   2.3) Set mailbox for pool (get default mailbox from master settings -> default to SelectiveMailbox)
     val worker = Props(handlerSettings.workerClass, handlerSettings.workerParams).withMailbox("<<Mailbox String>>")
-    //   1.5) Get module name from ModuleSettings         (name: String           )
+    // 3.) Create worker pool
+    //   3.1) Compose worker pool prop from 'pool' and 'worker' props previously created
+    //   3.2) Get module name from ModuleSettings         (name: String           )
     workerPool = Some(context.actorOf(pool.props(worker), handlerSettings.name))
-    // 2.) Subscribe worker pool to all configured events (assume default ActorSystem event bus for right now)
+    // 4.) Subscribe worker pool to all configured events (assume default ActorSystem event bus for right now)
     handlerSettings.events.foreach { event =>
       context.system.eventStream.subscribe(workerPool.get, event)
     }
