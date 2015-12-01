@@ -6,6 +6,6 @@ lazy val scalaMistral = (project in file (".")).
     scalaVersion := "2.11.7",
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.3.0",
-      "com.typesafe.akka" %% "akka-actor" % "2.3.12"
+      "com.typesafe.akka" %% "akka-actor" % "2.4.1"
     )
   )
