@@ -81,8 +81,8 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
       handleReinitialize()
     case Status =>
       handleStatusRequest(sender)
-    case Stop =>
-      handleShutdown()
+    case Stop(forced) =>
+      handleShutdown(forced)
     case unsupported =>
       handleUnsupportedMsg(sender, unsupported, "Running")
   }
@@ -122,7 +122,12 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     origin ! StatusResponse
   }
 
-  private def handleShutdown(): Unit = {
+  private def handleShutdown(forced: Boolean): Unit = {
+    // 1.)  Unsubscribe worker pool from event stream
+    // 2a.) If forced = false: Send shutdown signal to workers
+    // 2b.) If forced = true : Shutdown worker pool
+    // 3.)  Dispose of worker pool after all workers have shutdown
+    // 4.)  Shutdown ModuleHandler
     // TODO slk: implement stopping procedure
   }
 
@@ -160,7 +165,7 @@ object ModuleHandler {
     case object Reinitialize
     case object Start
     case object Status
-    case object Stop
+    case class Stop(forced: Boolean = false)
   }
 
   /**
