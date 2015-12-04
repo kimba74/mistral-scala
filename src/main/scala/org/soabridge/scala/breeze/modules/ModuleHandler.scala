@@ -63,9 +63,9 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     case Start =>
       handleStartup()
     case Status =>
-      handleStatusRequest(sender)
+      handleStatusRequest()
     case unsupported =>
-      handleUnsupportedMsg(sender, unsupported.toString, "Initial")
+      handleUnsupportedMsg(unsupported.toString, "Initial")
   }
 
   /**
@@ -80,11 +80,11 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     case Reinitialize =>
       handleReinitialize()
     case Status =>
-      handleStatusRequest(sender)
+      handleStatusRequest()
     case Stop(forced) =>
       handleShutdown(forced)
     case unsupported =>
-      handleUnsupportedMsg(sender, unsupported, "Running")
+      handleUnsupportedMsg(unsupported, "Running")
   }
 
 
@@ -117,9 +117,9 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     context become stateRunning
   }
 
-  private def handleStatusRequest(origin: ActorRef): Unit = {
+  private def handleStatusRequest(): Unit = {
     // TODO slk: implement status request-response procedure
-    origin ! StatusResponse
+    sender ! StatusResponse
   }
 
   private def handleShutdown(forced: Boolean): Unit = {
@@ -131,9 +131,9 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
     // TODO slk: implement stopping procedure
   }
 
-  private def handleUnsupportedMsg(origin: ActorRef, message: Any, state: String): Unit = {
+  private def handleUnsupportedMsg(message: Any, state: String): Unit = {
     // TODO slk: implement handling unsupported messages
-    origin ! MessageNotSupported(message.toString, state)
+    sender ! MessageNotSupported(message.toString, state)
   }
 }
 
