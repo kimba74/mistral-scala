@@ -11,7 +11,8 @@ import akka.actor._
  */
 private[breeze] class ModulesActor extends Actor {
   /* Importing all messages declared in companion object for processing */
-  import ModulesActor.Messages._
+  import ModulesActor.Requests._
+  import ModulesActor.Responses._
 
   /** Supervisor strategy for the subordinate module handlers. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
@@ -24,19 +25,32 @@ private[breeze] class ModulesActor extends Actor {
 
   val initialize: Receive = {
     case Start =>
-      //TODO slk: implement module initialization
-      context become processing
+      handleStartup()
     case Status =>
-      //TODO slk: implement Status behavior
+      handleStatusRequest()
   }
 
   val processing: Receive = {
     case Status =>
-      //TODO slk: implement Status behavior
-    case Stop =>
-      //TODO slk: implement Stop behavior
+      handleStatusRequest()
+    case Stop(forced) =>
+      handleShutdown(forced)
     case Terminated =>
       //TODO slk: implement watchdog behavior
+  }
+
+  private def handleShutdown(forced: Boolean): Unit = {
+    // TODO slk: implement stopping procedure
+  }
+
+  private def handleStartup(): Unit = {
+    //TODO slk: implement module initialization
+    context become processing
+  }
+
+  private def handleStatusRequest(): Unit = {
+    // TODO slk: implement status request-response procedure
+    sender ! StatusResponse
   }
 }
 
@@ -51,9 +65,13 @@ private[breeze] object ModulesActor {
   val props: Props = Props[ModulesActor]
 
   /** Accepted messages for ModulesActor */
-  object Messages {
+  object Requests {
     case object Start
     case object Status
-    case object Stop
+    case class Stop(forced: Boolean = false)
+  }
+
+  object Responses {
+    case class StatusResponse()
   }
 }
