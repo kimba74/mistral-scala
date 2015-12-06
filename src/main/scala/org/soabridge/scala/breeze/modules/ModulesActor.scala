@@ -33,10 +33,10 @@ private[breeze] class ModulesActor extends Actor {
   val processing: Receive = {
     case Status =>
       handleStatusRequest()
-    case Stop(forced) =>
+    case Shutdown(forced) =>
       handleShutdown(forced)
-    case Terminated =>
-      //TODO slk: implement watchdog behavior
+    case Terminated(module) =>
+      handleModuleTermination(module)
   }
 
   private def handleShutdown(forced: Boolean): Unit = {
@@ -51,6 +51,10 @@ private[breeze] class ModulesActor extends Actor {
   private def handleStatusRequest(): Unit = {
     // TODO slk: implement status request-response procedure
     sender ! StatusResponse
+  }
+
+  private def handleModuleTermination(module: ActorRef): Unit = {
+    //TODO slk: implement watchdog behavior for terminated module
   }
 }
 
@@ -68,7 +72,7 @@ private[breeze] object ModulesActor {
   object Requests {
     case object Start
     case object Status
-    case class Stop(forced: Boolean = false)
+    case class Shutdown(forced: Boolean = false)
   }
 
   object Responses {

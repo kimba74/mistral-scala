@@ -81,7 +81,7 @@ class ModuleHandler(settings: ModuleSettings) extends Actor {
       handleReinitialize()
     case Status =>
       handleStatusRequest()
-    case Stop(forced) =>
+    case Shutdown(forced) =>
       handleShutdown(forced)
     case unsupported =>
       handleUnsupportedMsg(unsupported, "Running")
@@ -165,7 +165,7 @@ object ModuleHandler {
     case object Reinitialize
     case object Start
     case object Status
-    case class Stop(forced: Boolean = false)
+    case class Shutdown(forced: Boolean = false)
   }
 
   /**
