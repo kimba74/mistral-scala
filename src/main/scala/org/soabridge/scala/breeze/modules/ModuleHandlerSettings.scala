@@ -9,7 +9,7 @@ import com.typesafe.config.Config
  * @author <a href="steffen.krause@soabridge.com">Steffen Krause</a>
  * @since 1.0
  */
-class ModuleSettings(val conf: Config, final val name: String) {
+class ModuleHandlerSettings(val conf: Config, final val name: String) {
 
   private def validate(config: Config):Boolean = true // TODO slk: implement validation logic
 
@@ -47,7 +47,7 @@ class ModuleSettings(val conf: Config, final val name: String) {
  * @author <a href="steffen.krause@soabridge.com">Steffen Krause</a>
  * @since 1.0
  */
-object ModuleSettings {
+object ModuleHandlerSettings {
 
-  def apply(conf: Config): ModuleSettings = new ModuleSettings(conf, conf.getString("name"))
+  def apply(conf: Config): ModuleHandlerSettings = new ModuleHandlerSettings(conf, conf.getString("name"))
 }

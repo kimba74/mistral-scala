@@ -9,7 +9,8 @@ import akka.actor._
  * @author <a href="steffen.krause@soabridge.com">Steffen Krause</a>
  * @since 1.0
  */
-private[breeze] class ModulesActor extends Actor {
+private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
+
   /* Importing all messages declared in companion object for processing */
   import ModulesActor.Requests._
   import ModulesActor.Responses._
@@ -44,6 +45,9 @@ private[breeze] class ModulesActor extends Actor {
   }
 
   private def handleStartup(): Unit = {
+    settings.modules foreach {module =>
+      // TODO slk: Register and start ModuleHandler for each configured module
+    }
     //TODO slk: implement module initialization
     context become processing
   }

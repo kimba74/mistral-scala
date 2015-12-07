@@ -10,9 +10,9 @@ import akka.routing.RoundRobinPool
  * @author <a href="steffen.krause@soabridge.com">Steffen Krause</a>
  * @since 1.0
  */
-class ModuleHandler(settings: ModuleSettings) extends Actor {
+private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Actor {
 
-  // Import ModuleHandler specific communication objects
+  /* Import ModuleHandler specific communication objects */
   import ModuleHandler.Faults._
   import ModuleHandler.Requests._
   import ModuleHandler.Responses._
@@ -161,7 +161,7 @@ object ModuleHandler {
    * Object containing all accepted message requests for ModuleHandler
    */
   object Requests {
-    case class Configure(settings: ModuleSettings)
+    case class Configure(settings: ModuleHandlerSettings)
     case object Reinitialize
     case object Start
     case object Status
