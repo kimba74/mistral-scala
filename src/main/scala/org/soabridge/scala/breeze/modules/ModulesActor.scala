@@ -15,6 +15,8 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   import ModulesActor.Requests._
   import ModulesActor.Responses._
 
+  private var modules: Seq[ActorRef] = Seq[ActorRef]()
+
   /** Supervisor strategy for the subordinate module handlers. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     //TODO slk: implement supervisor strategy
@@ -22,16 +24,16 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   }
 
   /** Message processing */
-  def receive: Receive = initialize
+  def receive: Receive = stateInitialize
 
-  val initialize: Receive = {
+  val stateInitialize: Receive = {
     case Start =>
       handleStartup()
     case Status =>
       handleStatusRequest()
   }
 
-  val processing: Receive = {
+  val stateRunning: Receive = {
     case Status =>
       handleStatusRequest()
     case Shutdown(forced) =>
@@ -45,11 +47,13 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   }
 
   private def handleStartup(): Unit = {
-    settings.modules foreach {module =>
-      // TODO slk: Register and start ModuleHandler for each configured module
+    // TODO slk: check startup logic
+    settings.modules foreach { module =>
+      val mod = context.actorOf(ModuleHandler.props(module), s"module-${module.name}")
+      mod ! ModuleHandler.Requests.Start
+      mod +: modules
     }
-    //TODO slk: implement module initialization
-    context become processing
+    context become stateRunning
   }
 
   private def handleStatusRequest(): Unit = {

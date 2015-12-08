@@ -150,6 +150,11 @@ object ModuleHandler {
   val props = Props[ModuleHandler]
 
   /**
+   *
+   */
+  def props(settings: ModuleHandlerSettings) = Props(classOf[ModuleHandler], settings)
+
+  /**
    * Object containing fault messages the ModuleHandler returns in response
    * to invalid requests sent.
    */
