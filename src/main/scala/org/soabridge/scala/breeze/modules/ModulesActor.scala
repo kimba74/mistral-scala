@@ -15,7 +15,7 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   import ModulesActor.Requests._
   import ModulesActor.Responses._
 
-  private var modules: Seq[ActorRef] = Seq[ActorRef]()
+  private val modules: Seq[ActorRef] = Seq[ActorRef]()
 
   /** Supervisor strategy for the subordinate module handlers. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
