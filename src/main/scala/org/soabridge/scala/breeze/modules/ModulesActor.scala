@@ -15,25 +15,22 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   import ModulesActor.Requests._
   import ModulesActor.Responses._
 
-  private val modules: Seq[ActorRef] = Seq[ActorRef]()
+  /* Create actor the list of configured modules */
+  private val modules: Seq[ActorRef] = settings.modules.map { module =>
+    context.actorOf(ModuleHandler.props(module), s"module-${module.name}")
+    // TODO slk: Register ModulesActor as watchdog for all ModuleHandler actors
+  }
 
   /** Supervisor strategy for the subordinate module handlers. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
-    //TODO slk: implement supervisor strategy
+    // TODO slk: implement supervisor strategy
     case _ => Resume
   }
 
   /** Message processing */
-  def receive: Receive = stateInitialize
-
-  val stateInitialize: Receive = {
+  def receive: Receive =  {
     case Start =>
       handleStartup()
-    case Status =>
-      handleStatusRequest()
-  }
-
-  val stateRunning: Receive = {
     case Status =>
       handleStatusRequest()
     case Shutdown(forced) =>
@@ -43,17 +40,17 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   }
 
   private def handleShutdown(forced: Boolean): Unit = {
-    // TODO slk: implement stopping procedure
+    /* Shutdown all configured modules */
+    modules foreach { mod =>
+      mod ! ModuleHandler.Requests.Shutdown
+    }
   }
 
   private def handleStartup(): Unit = {
-    // TODO slk: check startup logic
-    settings.modules foreach { module =>
-      val mod = context.actorOf(ModuleHandler.props(module), s"module-${module.name}")
+    /* Start all configured modules */
+    modules foreach { mod =>
       mod ! ModuleHandler.Requests.Start
-      mod +: modules
     }
-    context become stateRunning
   }
 
   private def handleStatusRequest(): Unit = {
