@@ -2,6 +2,7 @@ package org.soabridge.scala.breeze.modules
 
 import akka.actor.SupervisorStrategy.Resume
 import akka.actor._
+import org.soabridge.scala.breeze.modules.ModulesActor.Requests
 
 /**
  * Missing documentation. 
@@ -16,9 +17,13 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   import ModulesActor.Responses._
 
   /* Create actor the list of configured modules */
-  private val modules: Seq[ActorRef] = settings.modules.map { module =>
-    context.actorOf(ModuleHandler.props(module), s"module-${module.name}")
-    // TODO slk: Register ModulesActor as watchdog for all ModuleHandler actors
+  private val modules: Seq[(String, ActorRef)] = settings.modules.map { module =>
+    val name = s"module-${module.name}"
+    val handler = context.actorOf(ModuleHandler.props(module), name)
+    // Register this actor as watchdog for the module actors
+    context.watch(handler)
+    // Construct the name -> ActorRef tuple
+    (name, handler)
   }
 
   /** Supervisor strategy for the subordinate module handlers. */
@@ -41,14 +46,14 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
 
   private def handleShutdown(forced: Boolean): Unit = {
     /* Shutdown all configured modules */
-    modules foreach { mod =>
+    modules foreach { case (name, mod) =>
       mod ! ModuleHandler.Requests.Shutdown
     }
   }
 
   private def handleStartup(): Unit = {
     /* Start all configured modules */
-    modules foreach { mod =>
+    modules foreach { case (name, mod) =>
       mod ! ModuleHandler.Requests.Start
     }
   }
@@ -75,6 +80,7 @@ private[breeze] object ModulesActor {
 
   /** Accepted messages for ModulesActor */
   object Requests {
+    /* ModulesActor control messages */
     case object Start
     case object Status
     case class Shutdown(forced: Boolean = false)
