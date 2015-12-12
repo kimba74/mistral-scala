@@ -2,7 +2,6 @@ package org.soabridge.scala.breeze.modules
 
 import akka.actor.SupervisorStrategy.Resume
 import akka.actor._
-import org.soabridge.scala.breeze.modules.ModulesActor.Requests
 
 /**
  * Missing documentation. 
@@ -42,6 +41,19 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
       handleShutdown(forced)
     case Terminated(module) =>
       handleModuleTermination(module)
+    case AddModule(module) =>
+      handleModuleAdd(module)
+    case RemoveModule(module) =>
+      handleModuleRemove(module)
+  }
+
+
+  private def handleModuleAdd(settings: ModuleHandlerSettings): Unit = {
+    // TODO slk: implement instantiating ModuleHandler and adding it to the list
+  }
+
+  private def handleModuleRemove(settings: ModuleHandlerSettings): Unit = {
+    // TODO slk: implement terminating ModuleHandler and removing it from the list
   }
 
   private def handleShutdown(forced: Boolean): Unit = {
@@ -84,6 +96,9 @@ private[breeze] object ModulesActor {
     case object Start
     case object Status
     case class Shutdown(forced: Boolean = false)
+    /* ModulesActor module control messages */
+    case class AddModule(settings: ModuleHandlerSettings)
+    case class RemoveModule(settings: ModuleHandlerSettings)
   }
 
   object Responses {
