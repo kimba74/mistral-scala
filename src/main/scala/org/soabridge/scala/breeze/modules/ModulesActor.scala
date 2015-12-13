@@ -15,14 +15,12 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   import ModulesActor.Requests._
   import ModulesActor.Responses._
 
-  /* Create actor the list of configured modules */
-  private val modules: Seq[(String, ActorRef)] = settings.modules.map { module =>
-    val name = s"module-${module.name}"
-    val handler = context.actorOf(ModuleHandler.props(module), name)
-    // Register this actor as watchdog for the module actors
-    context.watch(handler)
-    // Construct the name -> ActorRef tuple
-    (name, handler)
+  /* Declare and initialize list for all running ModuleHandlers */
+  private val modules: Seq[(String, ActorRef)] = Seq()
+
+  /* Initialize ModuleHandlers list with all configured modules */
+  settings.modules foreach {
+    module => handleModuleAdd(module)
   }
 
   /** Supervisor strategy for the subordinate module handlers. */
@@ -49,11 +47,15 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
 
 
   private def handleModuleAdd(settings: ModuleHandlerSettings): Unit = {
-    // TODO slk: implement instantiating ModuleHandler and adding it to the list
+    val handler = context.actorOf(ModuleHandler.props(settings), s"module-${settings.name}")
+    // Register this actor as watchdog for the ModuleHandler actor
+    context.watch(handler)
+    // Add module to modules list
+    (settings.name, handler) +: modules
   }
 
   private def handleModuleRemove(settings: ModuleHandlerSettings): Unit = {
-    // TODO slk: implement terminating ModuleHandler and removing it from the list
+    // TODO slk: implement shutting down and removing ModuleHandler from list
   }
 
   private def handleShutdown(forced: Boolean): Unit = {
