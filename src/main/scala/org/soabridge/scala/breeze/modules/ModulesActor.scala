@@ -16,12 +16,7 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   import ModulesActor.Responses._
 
   /* Declare and initialize list for all running ModuleHandlers */
-  private val modules: Seq[(String, ActorRef)] = Seq()
-
-  /* Initialize ModuleHandlers list with all configured modules */
-  settings.modules foreach {
-    module => handleModuleAdd(module)
-  }
+  private var modules: Seq[(String, ActorRef)] = addModuleHandler(Seq(), settings.modules: _*)
 
   /** Supervisor strategy for the subordinate module handlers. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
@@ -40,18 +35,19 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
     case Terminated(module) =>
       handleModuleTermination(module)
     case AddModule(module) =>
-      handleModuleAdd(module)
+      modules = addModuleHandler(modules, module)
     case RemoveModule(module) =>
       handleModuleRemove(module)
   }
 
 
-  private def handleModuleAdd(settings: ModuleHandlerSettings): Unit = {
-    val handler = context.actorOf(ModuleHandler.props(settings), s"module-${settings.name}")
-    // Register this actor as watchdog for the ModuleHandler actor
-    context.watch(handler)
-    // Add module to modules list
-    (settings.name, handler) +: modules
+  private def addModuleHandler(list: Seq[(String, ActorRef)], module: ModuleHandlerSettings*): Seq[(String, ActorRef)] = {
+    if (module.nonEmpty) {
+      val handler = context.actorOf(ModuleHandler.props(module.head), s"module-${module.head.name}")
+      addModuleHandler((module.head.name, handler) +: list, module.tail:_*)
+    }
+    else
+      list
   }
 
   private def handleModuleRemove(settings: ModuleHandlerSettings): Unit = {
