@@ -16,7 +16,7 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   import ModulesActor.Responses._
 
   /* Declare and initialize list for all running ModuleHandlers */
-  private var modules: Seq[(String, ActorRef)] = addModuleHandler(Seq(), settings.modules: _*)
+  private var modules: Seq[ActorRef] = startModuleHandler(Seq(), settings.modules: _*)
 
   /** Supervisor strategy for the subordinate module handlers. */
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
@@ -32,37 +32,36 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
       handleStatusRequest()
     case Shutdown(forced) =>
       handleShutdown(forced)
-    case Terminated(module) =>
-      handleModuleTermination(module)
-    case AddModule(module) =>
-      modules = addModuleHandler(modules, module)
-    case RemoveModule(module) =>
-      handleModuleRemove(module)
+    case Terminated(moduleHandler) =>
+      modules = modules filterNot (_ equals moduleHandler)
+    case AddModule(moduleHandlerSettings) =>
+      modules = startModuleHandler(modules, moduleHandlerSettings)
+    case RemoveModule(moduleHandlerSettings) =>
+      shutdownModuleRemove(moduleHandlerSettings)
   }
 
 
-  private def addModuleHandler(list: Seq[(String, ActorRef)], module: ModuleHandlerSettings*): Seq[(String, ActorRef)] =
-  module.toList match {
+  private def startModuleHandler(list: Seq[ActorRef], settings: ModuleHandlerSettings*): Seq[ActorRef] = settings.toList match {
     case Nil => list
     case head :: tail =>
-      val handler = context.actorOf(ModuleHandler.props(module.head), s"module-${module.head.name}")
-      addModuleHandler((module.head.name, handler) +: list, module.tail:_*)
+      val handler = context.actorOf(ModuleHandler.props(settings.head), head.name)
+      startModuleHandler(handler +: list, settings.tail:_*)
   }
 
-  private def handleModuleRemove(settings: ModuleHandlerSettings): Unit = {
-    // TODO slk: implement shutting down and removing ModuleHandler from list
+  private def shutdownModuleRemove(settings: ModuleHandlerSettings): Unit = context child settings.name match {
+    case Some(mod) => mod ! ModuleHandler.Requests.Shutdown
   }
 
   private def handleShutdown(forced: Boolean): Unit = {
     /* Shutdown all configured modules */
-    modules foreach { case (name, mod) =>
+    modules foreach { mod =>
       mod ! ModuleHandler.Requests.Shutdown
     }
   }
 
   private def handleStartup(): Unit = {
     /* Start all configured modules */
-    modules foreach { case (name, mod) =>
+    modules foreach { mod =>
       mod ! ModuleHandler.Requests.Start
     }
   }
