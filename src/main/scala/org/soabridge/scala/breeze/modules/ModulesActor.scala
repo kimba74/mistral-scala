@@ -70,10 +70,6 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
     // TODO slk: implement status request-response procedure
     sender ! StatusResponse
   }
-
-  private def handleModuleTermination(module: ActorRef): Unit = {
-    //TODO slk: implement watchdog behavior for terminated module
-  }
 }
 
 /**
