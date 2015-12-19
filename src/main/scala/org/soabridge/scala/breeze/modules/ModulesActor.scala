@@ -32,10 +32,13 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
       handleStatusRequest()
     case Shutdown(forced) =>
       handleShutdown(forced)
+    /* Takes the terminated module out of the modules list */
     case Terminated(moduleHandler) =>
       modules = modules filterNot (_ equals moduleHandler)
+    /* Adds new module handler to modules list and starts it */
     case AddModule(moduleHandlerSettings) =>
       modules = startModuleHandler(modules, moduleHandlerSettings)
+    /* Shuts down the module handler for the provided settings */
     case RemoveModule(moduleHandlerSettings) =>
       shutdownModuleRemove(moduleHandlerSettings)
   }
