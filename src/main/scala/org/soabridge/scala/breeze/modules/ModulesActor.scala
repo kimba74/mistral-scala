@@ -34,13 +34,14 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
       handleShutdown(forced)
     /* Takes the terminated module out of the modules list */
     case Terminated(moduleHandler) =>
+      context.unwatch(moduleHandler)
       modules = modules filterNot (_ equals moduleHandler)
     /* Adds new module handler to modules list and starts it */
     case AddModule(moduleHandlerSettings) =>
       modules = startModuleHandler(modules, moduleHandlerSettings)
     /* Shuts down the module handler for the provided settings */
     case RemoveModule(moduleHandlerSettings) =>
-      shutdownModuleRemove(moduleHandlerSettings)
+      shutdownModuleHandler(moduleHandlerSettings)
   }
 
 
@@ -48,10 +49,11 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
     case Nil => list
     case head :: tail =>
       val handler = context.actorOf(ModuleHandler.props(settings.head), head.name)
+      context.watch(handler)
       startModuleHandler(handler +: list, settings.tail:_*)
   }
 
-  private def shutdownModuleRemove(settings: ModuleHandlerSettings): Unit = context child settings.name match {
+  private def shutdownModuleHandler(settings: ModuleHandlerSettings): Unit = context child settings.name match {
     case Some(mod) => mod ! ModuleHandler.Requests.Shutdown
   }
 
