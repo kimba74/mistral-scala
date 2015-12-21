@@ -48,8 +48,11 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
   private def startModuleHandler(list: Seq[ActorRef], settings: ModuleHandlerSettings*): Seq[ActorRef] = settings.toList match {
     case Nil => list
     case head :: tail =>
+      /* Create ModuleHandler actor for configured module */
       val handler = context.actorOf(ModuleHandler.props(settings.head), head.name)
+      /* Register this actor as watchdog of the ModuleHandler */
       context.watch(handler)
+      /* Add ModuleHandler to list and handle the next module configured */
       startModuleHandler(handler +: list, settings.tail:_*)
   }
 
