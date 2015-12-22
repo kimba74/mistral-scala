@@ -65,6 +65,10 @@ private[breeze] class ModulesActor(settings: ModulesSettings) extends Actor {
     modules foreach { mod =>
       mod ! ModuleHandler.Requests.Shutdown
     }
+    /* Wait until all configured modules shut down */
+    // TODO slk: figure out how to wait for all modules to have finished shutting down
+    /* Shutdown this actor */
+    context.stop(self)
   }
 
   private def handleStartup(): Unit = {
