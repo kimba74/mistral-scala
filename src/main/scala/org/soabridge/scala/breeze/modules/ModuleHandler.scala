@@ -124,11 +124,13 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
 
   private def handleShutdown(forced: Boolean): Unit = {
     // 1.)  Unsubscribe worker pool from event stream
+    context.system.eventStream.unsubscribe(workerPool.get)
     // 2a.) If forced = false: Send shutdown signal to workers
     // 2b.) If forced = true : Shutdown worker pool
     // 3.)  Dispose of worker pool after all workers have shutdown
     // 4.)  Shutdown ModuleHandler
-    // TODO slk: implement stopping procedure
+    context.stop(self)
+    // TODO slk: finish implementing stopping procedure
   }
 
   private def handleUnsupportedMsg(message: Any, state: String): Unit = {
