@@ -99,7 +99,7 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
     //   1.1) Assume RoundRobinPool for now
     //   1.2) Get pool size from ModuleSettings           (workerPoolSize: Int > 0)
     //   1.3) Set a SupervisorStrategy for the workers
-    val pool      = RoundRobinPool(handlerSettings.poolSize, supervisorStrategy = workerSupervisorStrategy)
+    val pool = RoundRobinPool(handlerSettings.poolSize, supervisorStrategy = workerSupervisorStrategy)
     // 2.) Create worker props
     //   2.1) Get worker class from ModuleSettings        (workerClass: Class[_]  )
     //   2.2) Get worker parameters from ModuleSettings   (workerParams: Seq[Any] )
