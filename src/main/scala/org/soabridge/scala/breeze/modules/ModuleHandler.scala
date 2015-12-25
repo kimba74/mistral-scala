@@ -126,7 +126,9 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
     // 1.)  Unsubscribe worker pool from event stream
     context.system.eventStream.unsubscribe(workerPool.get)
     // 2a.) If forced = false: Send shutdown signal to workers
+    // TODO slk: look into graceful shutdown of worker pool (poisonPill)
     // 2b.) If forced = true : Shutdown worker pool
+    // TODO slk: look into forced shutdown of worker pool (kill)
     // 3.)  Dispose of worker pool after all workers have shutdown
     // 4.)  Shutdown ModuleHandler
     context.stop(self)
