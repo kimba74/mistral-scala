@@ -125,10 +125,14 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
   private def handleShutdown(forced: Boolean): Unit = {
     // 1.)  Unsubscribe worker pool from event stream
     context.system.eventStream.unsubscribe(workerPool.get)
-    // 2a.) If forced = false: Send shutdown signal to workers
-    // TODO slk: look into graceful shutdown of worker pool (e.g. gracefulStop pattern akka.pattern)
-    // 2b.) If forced = true : Shutdown worker pool
-    // TODO slk: look into forced shutdown of worker pool
+    // 2a.) If forced = true : Shutdown worker pool
+    if (forced) {
+      // TODO slk: look into forced shutdown of worker pool
+    }
+    // 2b.) If forced = false: Send shutdown signal to workers
+    else {
+      // TODO slk: look into graceful shutdown of worker pool (e.g. gracefulStop pattern akka.pattern)
+    }
     // 3.)  Dispose of worker pool after all workers have shutdown
     // 4.)  Shutdown ModuleHandler
     context.stop(self)
