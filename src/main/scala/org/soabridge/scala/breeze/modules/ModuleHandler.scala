@@ -134,6 +134,7 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
       // TODO slk: look into graceful shutdown of worker pool (e.g. gracefulStop pattern akka.pattern)
     }
     // 3.)  Dispose of worker pool after all workers have shutdown
+    workerPool = None
     // 4.)  Shutdown ModuleHandler
     context.stop(self)
     // TODO slk: finish implementing stopping procedure
