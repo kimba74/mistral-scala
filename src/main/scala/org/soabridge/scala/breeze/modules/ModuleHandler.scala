@@ -1,8 +1,13 @@
 package org.soabridge.scala.breeze.modules
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.SupervisorStrategy.Resume
 import akka.actor._
+import akka.pattern._
 import akka.routing.RoundRobinPool
+
+import scala.concurrent.duration.FiniteDuration
 
 /**
  * Missing documentation.
@@ -132,6 +137,7 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
     // 2b.) If forced = false: Send shutdown signal to workers
     else {
       // TODO slk: look into graceful shutdown of worker pool (e.g. gracefulStop pattern akka.pattern)
+      gracefulStop(workerPool.get, FiniteDuration(500, TimeUnit.MILLISECONDS)) // Test gracefulStop
     }
     // 3.)  Dispose of worker pool after all workers have shutdown
     workerPool = None
