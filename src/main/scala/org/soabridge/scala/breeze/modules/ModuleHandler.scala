@@ -133,6 +133,7 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
     // 2a.) If forced = true : Shutdown worker pool
     if (forced) {
       // TODO slk: look into forced shutdown of worker pool
+      gracefulStop(workerPool.get, FiniteDuration(0, TimeUnit.MILLISECONDS)) // Test gracefulStop
     }
     // 2b.) If forced = false: Send shutdown signal to workers
     else {
