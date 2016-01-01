@@ -128,7 +128,7 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
   }
 
   private def handleShutdown(forced: Boolean): Unit = {
-    // 1.)  Unsubscribe worker pool from event stream
+    // 1.)  Unsubscribe worker pool from event stream for all sub-channels
     context.system.eventStream.unsubscribe(workerPool.get)
     // 2a.) If forced = true : Shutdown worker pool
     if (forced) {
