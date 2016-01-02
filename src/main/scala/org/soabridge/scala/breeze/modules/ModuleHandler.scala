@@ -133,7 +133,8 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
     // 2a.) If forced = true : Shutdown worker pool
     if (forced) {
       // TODO slk: look into forced shutdown of worker pool
-      gracefulStop(workerPool.get, FiniteDuration(0, TimeUnit.MILLISECONDS)) // Test gracefulStop (not sure about this one)
+      // gracefulStop() not working for forceful shutdown of actors -> 'timeout' only determines how long the
+      // returned future object will wait for completion of the actor shutdown before it will return with 'failed'
     }
     // 2b.) If forced = false: Send shutdown signal to workers
     else {
