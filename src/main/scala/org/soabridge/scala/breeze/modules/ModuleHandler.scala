@@ -140,6 +140,10 @@ private[breeze] class ModuleHandler(settings: ModuleHandlerSettings) extends Act
     // 2b.) If forced = false: Send shutdown signal to workers
     else {
       // TODO slk: look into graceful shutdown of worker pool (e.g. gracefulStop pattern akka.pattern)
+      // gracefulStop() will send a PoisonPill message (unless specified otherwise) to the actor which will be
+      // placed in the queue with all other messages and will cause the actor to shutdown once the PoisonPill
+      // is being processed. -> Find a way to either implement an own, inherited shutdown mechanism or check
+      // on how to give the PoisonPill the highest priority.
       gracefulStop(workerPool.get, FiniteDuration(500, TimeUnit.MILLISECONDS)) // Test gracefulStop
     }
     // 3.)  Dispose of worker pool after all workers have shutdown
